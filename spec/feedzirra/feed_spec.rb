@@ -2,12 +2,11 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 class FailParser
   def self.parse(_, on_failure)
-    on_failure.call
+    raise StandardError
   end
 end
 
 describe Feedzirra::Feed do
-
   describe "#add_common_feed_element" do
     before(:all) do
       Feedzirra::Feed.add_common_feed_element("generator")

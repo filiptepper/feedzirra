@@ -288,10 +288,7 @@ module Feedzirra
 
           if klass
             begin
-              parser_on_failure = Proc.new do |message|
-                raise "Error while parsing [#{url}] #{message}"
-              end
-              feed = klass.parse xml, parser_on_failure
+              feed = klass.parse xml, on_parser_failure
 
               feed.feed_url = c.last_effective_url
               feed.etag = etag_from_header(c.header_str)
@@ -356,10 +353,7 @@ module Feedzirra
           begin
             add_feed_to_multi(multi, feed_queue.shift, feed_queue, responses, options) unless feed_queue.empty?
 
-            parser_on_failure = Proc.new do |message|
-              raise "Error while parsing [#{feed.feed_url}] #{message}"
-            end
-            updated_feed = Feed.parse c.body_str, &parser_on_failure
+            updated_feed = Feed.parse c.body_str, &on_parser_failure
 
             updated_feed.feed_url = c.last_effective_url
             updated_feed.etag = etag_from_header(c.header_str)
@@ -407,6 +401,16 @@ module Feedzirra
     def self.last_modified_from_header(header)
       header =~ /.*Last-Modified:\s(.*)\r/
       Time.parse_safely($1) if $1
+    end
+
+
+    protected
+
+
+    def self.on_parser_failure
+      Proc.new do |message|
+        raise "Error while parsing [#{feed.feed_url}] #{message}"
+      end
     end
   end
 end
